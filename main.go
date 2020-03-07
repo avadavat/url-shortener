@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,6 +14,11 @@ import (
 )
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
+
 	// read config properties
 	config, err := ioutil.ReadFile(".config")
 	if err != nil {
@@ -40,8 +46,7 @@ func main() {
 	http.HandleFunc("/e/", handlers.Encode(db, tableName))
 	http.HandleFunc("/r/", handlers.Redirect(db, tableName))
 
-	// todo: is 9090 the right port?
-	err = http.ListenAndServe(":9090", nil) // set listen port
+	err = http.ListenAndServe(":"+port, nil) // set listen port
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
