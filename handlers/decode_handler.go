@@ -7,11 +7,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/dpgil/url-shortener/types"
 )
 
 // Decode takes a short link and returns the long link.
-func Decode(db *dynamodb.DynamoDB, tableName string) func(w http.ResponseWriter, r *http.Request) {
+func Decode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// parse short link from request
 		shortLink, err := parseURLArg("/d/", r.URL.String())

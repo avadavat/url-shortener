@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/dpgil/url-shortener/types"
 )
 
@@ -20,7 +21,7 @@ var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 var urlMapping = make(map[string]string)
 
 // Encode takes a long link, then generates, stores, and returns a short link.
-func Encode(db *dynamodb.DynamoDB, tableName string) func(w http.ResponseWriter, r *http.Request) {
+func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// parse long link from request
 		longLink, err := parseURLArg("/e/", r.URL.String())

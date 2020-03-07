@@ -7,11 +7,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/dpgil/url-shortener/types"
 )
 
 // Redirect decodes a link and redirects the client.
-func Redirect(db *dynamodb.DynamoDB, tableName string) func(w http.ResponseWriter, r *http.Request) {
+func Redirect(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// parse short link from request
 		shortLink, err := parseURLArg("/d/", r.URL.String())
