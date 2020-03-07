@@ -20,7 +20,7 @@ var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 var urlMapping = make(map[string]string)
 
 // Encode takes a long URL, then generates, stores, and returns a short URL.
-func Encode(db *dynamodb.DynamoDB) func(w http.ResponseWriter, r *http.Request) {
+func Encode(db *dynamodb.DynamoDB, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// parse long url from request
 		longURL, err := parseURLArg("/e/", r.URL.String())
@@ -55,7 +55,7 @@ func Encode(db *dynamodb.DynamoDB) func(w http.ResponseWriter, r *http.Request) 
 		// todo: delete this once dynamo works
 		// todo: allow table name to be configured
 		params := &dynamodb.PutItemInput{
-			TableName: aws.String("short-link-mappings"),
+			TableName: aws.String(tableName),
 			Item:      dbmapping,
 		}
 

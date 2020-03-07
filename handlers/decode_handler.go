@@ -8,7 +8,7 @@ import (
 )
 
 // Decode takes a short URL and returns the long URL.
-func Decode(db *dynamodb.DynamoDB) func(w http.ResponseWriter, r *http.Request) {
+func Decode(db *dynamodb.DynamoDB, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// parse short url from request
 		shortURL, err := parseURLArg("/d/", r.URL.String())

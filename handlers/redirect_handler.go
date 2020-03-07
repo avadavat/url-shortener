@@ -8,7 +8,7 @@ import (
 )
 
 // Redirect decodes a URL and redirects the client.
-func Redirect(db *dynamodb.DynamoDB) func(w http.ResponseWriter, r *http.Request) {
+func Redirect(db *dynamodb.DynamoDB, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// parse short url from request
 		shortURL, err := parseURLArg("/r/", r.URL.String())
