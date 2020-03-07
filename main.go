@@ -18,9 +18,9 @@ func main() {
 
 	// create an aws session
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region:   aws.String("us-east-1"),
-		Endpoint: aws.String("http://127.0.0.1:8000"),
-		//EndPoint: aws.String("https://dynamodb.us-east-1.amazonaws.com"),
+		Region: aws.String("us-west-2"),
+		// Endpoint: aws.String("http://127.0.0.1:8000"),
+		Endpoint: aws.String("https://dynamodb.us-west-2.amazonaws.com"),
 	}))
 
 	// create a dynamodb instance

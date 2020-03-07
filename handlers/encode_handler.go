@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/dpgil/url-shortener/types"
 )
 
 const shortURLLength = 4
@@ -29,14 +32,39 @@ func Encode(db *dynamodb.DynamoDB) func(w http.ResponseWriter, r *http.Request) 
 		// generate short url
 		var shortURL string
 		for {
+			// Keep generating a short url until we find one that doesn't already exist.
 			shortURL = generateShortURL()
+			// todo: check dynamo instead of the internal map
 			if _, ok := urlMapping[shortURL]; !ok {
-				urlMapping[shortURL] = longURL
 				break
 			}
 		}
 
-		// store the mapping
+		// store the new mapping
+		mapping := types.Mapping{
+			ShortLink: shortURL,
+			LongLink:  longURL,
+		}
+
+		dbmapping, err := dynamodbattribute.MarshalMap(mapping)
+		if err != nil {
+			http.Error(w, "error marshaling dynamo mapping", http.StatusInternalServerError)
+			return
+		}
+
+		// todo: delete this once dynamo works
+		// todo: allow table name to be configured
+		params := &dynamodb.PutItemInput{
+			TableName: aws.String("short-link-mappings"),
+			Item:      dbmapping,
+		}
+
+		_, err = db.PutItem(params)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error storing in dynamo: %s", err.Error()), http.StatusInternalServerError)
+			return
+		}
+
 		urlMapping[shortURL] = longURL
 
 		// return the short url
