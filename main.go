@@ -11,6 +11,7 @@ func main() {
 	http.HandleFunc("/d/", handlers.Decode)
 	http.HandleFunc("/e/", handlers.Encode)
 	http.HandleFunc("/r/", handlers.Redirect)
+
 	// todo: is 9090 the right port?
 	err := http.ListenAndServe(":9090", nil) // set listen port
 	if err != nil {

@@ -19,7 +19,7 @@ func Encode(w http.ResponseWriter, r *http.Request) {
 	// parse long url from request
 	longURL, err := parseURLArg("/e/", r.URL.String())
 	if err != nil {
-		// todo: error
+		http.Error(w, "error parsing url", http.StatusBadRequest)
 		return
 	}
 
