@@ -1,11 +1,9 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -18,10 +16,8 @@ var urlMapping = make(map[string]string)
 
 // Encode takes a long URL, then generates, stores, and returns a short URL.
 func Encode(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-
 	// parse long url from request
-	longURL, err := parseLongURLFromRequestURL(r.URL.String())
+	longURL, err := parseURLArg("/e/", r.URL.String())
 	if err != nil {
 		// todo: error
 		return
@@ -53,17 +49,4 @@ func generateShortURL() string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
-}
-
-// Parses the long URL from the request URL.
-// todo: there has to be a better way to structure our URLs to take
-// advantage of Go features
-func parseLongURLFromRequestURL(requestURL string) (string, error) {
-	// Expected in the format /encode/<longURL>
-	parsed := strings.Split(requestURL, "/encode/")
-	if len(parsed) < 2 {
-		return "", errors.New("unsuccessfully parsed url")
-	}
-
-	return parsed[1], nil
 }
