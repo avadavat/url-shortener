@@ -4,26 +4,46 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/dpgil/url-shortener/types"
 )
 
 // Redirect decodes a link and redirects the client.
 func Redirect(db *dynamodb.DynamoDB, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// parse short link from request
-		shortLink, err := parseURLArg("/r/", r.URL.String())
+		shortLink, err := parseURLArg("/d/", r.URL.String())
 		if err != nil {
-			http.Error(w, "error parsing link", http.StatusBadRequest)
+			http.Error(w, "error parsing url", http.StatusBadRequest)
 			return
 		}
 
-		// check if the short link is in the mapping
-		longLink, ok := urlMapping[shortLink]
-		if !ok {
-			http.Error(w, fmt.Sprintf("short link %s does not exist", shortLink), http.StatusBadRequest)
+		// check if the short link is in the database
+		params := &dynamodb.GetItemInput{
+			TableName: aws.String(tableName),
+			Key: map[string]*dynamodb.AttributeValue{
+				"shortLink": {
+					S: aws.String(shortLink),
+				},
+			},
+		}
+
+		resp, err := db.GetItem(params)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("short link %s not found in database", shortLink), http.StatusNotFound)
 			return
 		}
 
-		http.Redirect(w, r, longLink, http.StatusPermanentRedirect)
+		// unmarshal the dynamodb attribute values into our struct
+		var mapping types.Mapping
+		err = dynamodbattribute.UnmarshalMap(resp.Item, &mapping)
+		if err != nil {
+			http.Error(w, "error unmarshaling response from dynamo", http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, mapping.LongLink, http.StatusPermanentRedirect)
 	}
 }
