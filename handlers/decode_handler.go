@@ -10,29 +10,29 @@ import (
 	"github.com/dpgil/url-shortener/types"
 )
 
-// Decode takes a short URL and returns the long URL.
+// Decode takes a short link and returns the long link.
 func Decode(db *dynamodb.DynamoDB, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// parse short url from request
-		shortURL, err := parseURLArg("/d/", r.URL.String())
+		// parse short link from request
+		shortLink, err := parseURLArg("/d/", r.URL.String())
 		if err != nil {
 			http.Error(w, "error parsing url", http.StatusBadRequest)
 			return
 		}
 
-		// check if the short url is in the database
+		// check if the short link is in the database
 		params := &dynamodb.GetItemInput{
 			TableName: aws.String(tableName),
 			Key: map[string]*dynamodb.AttributeValue{
 				"shortLink": {
-					S: aws.String(shortURL),
+					S: aws.String(shortLink),
 				},
 			},
 		}
 
 		resp, err := db.GetItem(params)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("short link %s not found in database", shortURL), http.StatusNotFound)
+			http.Error(w, fmt.Sprintf("short link %s not found in database", shortLink), http.StatusNotFound)
 			return
 		}
 
