@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
 const shortURLLength = 4
@@ -15,29 +17,31 @@ var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 var urlMapping = make(map[string]string)
 
 // Encode takes a long URL, then generates, stores, and returns a short URL.
-func Encode(w http.ResponseWriter, r *http.Request) {
-	// parse long url from request
-	longURL, err := parseURLArg("/e/", r.URL.String())
-	if err != nil {
-		http.Error(w, "error parsing url", http.StatusBadRequest)
-		return
-	}
-
-	// generate short url
-	var shortURL string
-	for {
-		shortURL = generateShortURL()
-		if _, ok := urlMapping[shortURL]; !ok {
-			urlMapping[shortURL] = longURL
-			break
+func Encode(db *dynamodb.DynamoDB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// parse long url from request
+		longURL, err := parseURLArg("/e/", r.URL.String())
+		if err != nil {
+			http.Error(w, "error parsing url", http.StatusBadRequest)
+			return
 		}
+
+		// generate short url
+		var shortURL string
+		for {
+			shortURL = generateShortURL()
+			if _, ok := urlMapping[shortURL]; !ok {
+				urlMapping[shortURL] = longURL
+				break
+			}
+		}
+
+		// store the mapping
+		urlMapping[shortURL] = longURL
+
+		// return the short url
+		fmt.Fprintf(w, shortURL)
 	}
-
-	// store the mapping
-	urlMapping[shortURL] = longURL
-
-	// return the short url
-	fmt.Fprintf(w, shortURL)
 }
 
 // Generates a short URL
