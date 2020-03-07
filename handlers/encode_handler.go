@@ -17,9 +17,6 @@ const shortLinkLength = 4
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-// todo: replace with db
-var urlMapping = make(map[string]string)
-
 // Encode takes a long link, then generates, stores, and returns a short link.
 func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -30,13 +27,24 @@ func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.Response
 			return
 		}
 
-		// generate short link
 		var shortLink string
 		for {
 			// Keep generating a short link until we find one that doesn't already exist.
 			shortLink = generateShortLink()
-			// todo: check dynamo instead of the internal map
-			if _, ok := urlMapping[shortLink]; !ok {
+
+			// check if the short link is in the database
+			params := &dynamodb.GetItemInput{
+				TableName: aws.String(tableName),
+				Key: map[string]*dynamodb.AttributeValue{
+					"shortLink": {
+						S: aws.String(shortLink),
+					},
+				},
+			}
+
+			_, err := db.GetItem(params)
+			if err != nil {
+				// The shortlink does not already exist in the database.
 				break
 			}
 		}
@@ -53,8 +61,6 @@ func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.Response
 			return
 		}
 
-		// todo: delete this once dynamo works
-		// todo: allow table name to be configured
 		params := &dynamodb.PutItemInput{
 			TableName: aws.String(tableName),
 			Item:      dbmapping,
@@ -65,8 +71,6 @@ func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.Response
 			http.Error(w, fmt.Sprintf("error storing in dynamo: %s", err.Error()), http.StatusInternalServerError)
 			return
 		}
-
-		urlMapping[shortLink] = longLink
 
 		// return the short link
 		fmt.Fprintf(w, shortLink)
