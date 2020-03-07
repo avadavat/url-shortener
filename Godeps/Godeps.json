@@ -187,6 +187,11 @@
 			"Rev": "9544ea415446c1309c9382e3baa0ac8916507a63"
 		},
 		{
+			"ImportPath": "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface",
+			"Comment": "v1.25.13-155-g9544ea415",
+			"Rev": "9544ea415446c1309c9382e3baa0ac8916507a63"
+		},
+		{
 			"ImportPath": "github.com/aws/aws-sdk-go/service/sts",
 			"Comment": "v1.25.13-155-g9544ea415",
 			"Rev": "9544ea415446c1309c9382e3baa0ac8916507a63"
