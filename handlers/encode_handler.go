@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const shortURLLength = 5
+const shortURLLength = 4
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
