@@ -2,26 +2,21 @@ package handlers
 
 import (
 	"fmt"
-	"math/rand"
 	"net/http"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/dpgil/url-shortener/types"
+	"github.com/dpgil/url-shortener/util"
 )
-
-const shortLinkLength = 4
-
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 // Encode takes a long link, then generates, stores, and returns a short link.
 func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// parse long link from request
-		longLink, err := parseURLArg("/e/", r.URL.String())
+		longLink, err := util.ParseURLArg("/e/", r.URL.String())
 		if err != nil {
 			http.Error(w, "error parsing url", http.StatusBadRequest)
 			return
@@ -30,7 +25,7 @@ func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.Response
 		var shortLink string
 		for {
 			// Keep generating a short link until we find one that doesn't already exist.
-			shortLink = generateShortLink()
+			shortLink = util.GenerateShortLink()
 
 			// check if the short link is in the database
 			params := &dynamodb.GetItemInput{
@@ -75,15 +70,4 @@ func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.Response
 		// return the short link
 		fmt.Fprintf(w, shortLink)
 	}
-}
-
-// Generates a short link
-func generateShortLink() string {
-	rand.Seed(time.Now().UnixNano())
-
-	b := make([]rune, shortLinkLength)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
-	}
-	return string(b)
 }
