@@ -19,6 +19,18 @@ type mockDynamoDBClient struct {
 // Encode generates new shortlinks until it finds one that doesn't exist in the database.
 // An error is expected for Encode to be successful.
 func (m *mockDynamoDBClient) GetItem(input *dynamodb.GetItemInput) (*dynamodb.GetItemOutput, error) {
+	shortLink := *input.Key["shortLink"].S
+	longLink := "someLongLink"
+	if shortLink == "getItemSuccess" {
+		output := &dynamodb.GetItemOutput{
+			Item: map[string]*dynamodb.AttributeValue{
+				"shortLink": {S: &shortLink},
+				"longLink":  {S: &longLink},
+			},
+		}
+		return output, nil
+	}
+
 	return nil, errors.New("item does not exist in the database")
 }
 func (m *mockDynamoDBClient) PutItem(input *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
