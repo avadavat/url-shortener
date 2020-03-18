@@ -34,6 +34,11 @@ func Decode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.Response
 
 		resp, err := db.GetItem(params)
 		if err != nil {
+			http.Error(w, "dynamodb error", http.StatusInternalServerError)
+			return
+		}
+
+		if len(resp.Item) == 0 {
 			http.Error(w, fmt.Sprintf("short link %s not found in database", shortLink), http.StatusNotFound)
 			return
 		}

@@ -40,15 +40,19 @@ func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.Response
 				},
 			}
 
-			_, err := db.GetItem(params)
+			resp, err := db.GetItem(params)
 			if err != nil {
+				http.Error(w, "dynamodb error", http.StatusInternalServerError)
+			}
+
+			if len(resp.Item) == 0 {
 				// The shortlink does not already exist in the database.
 				break
 			}
 
 			retries++
 			if retries >= maxRetries {
-				http.Error(w, "error generating short link", http.StatusInternalServerError)
+				http.Error(w, "error generating unique short link", http.StatusInternalServerError)
 			}
 		}
 
