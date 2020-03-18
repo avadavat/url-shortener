@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,10 +14,12 @@ import (
 	"github.com/dpgil/url-shortener/handlers"
 )
 
+const defaultPort = "5000"
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
-		log.Fatal("$PORT must be set")
+		port = defaultPort
 	}
 
 	endpoint := os.Getenv("DYNAMO_ENDPOINT")
@@ -52,6 +55,7 @@ func main() {
 	http.HandleFunc("/e/", handlers.Encode(db, tableName))
 	http.HandleFunc("/r/", handlers.Redirect(db, tableName))
 
+	fmt.Println("Running on port: " + port)
 	err := http.ListenAndServe(":"+port, nil) // set listen port
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

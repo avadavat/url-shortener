@@ -12,6 +12,8 @@ import (
 	"github.com/dpgil/url-shortener/util"
 )
 
+const maxRetries = 3
+
 // Encode takes a long link, then generates, stores, and returns a short link.
 func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -23,6 +25,7 @@ func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.Response
 		}
 
 		var shortLink string
+		retries := 0
 		for {
 			// Keep generating a short link until we find one that doesn't already exist.
 			shortLink = util.GenerateShortLink()
@@ -41,6 +44,11 @@ func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.Response
 			if err != nil {
 				// The shortlink does not already exist in the database.
 				break
+			}
+
+			retries++
+			if retries >= maxRetries {
+				http.Error(w, "error generating short link", http.StatusInternalServerError)
 			}
 		}
 
