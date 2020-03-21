@@ -51,8 +51,8 @@ func main() {
 	// create a dynamodb instance
 	db := dynamodb.New(sess)
 
-	http.HandleFunc("/d/", handlers.Decode(db, tableName))
-	http.HandleFunc("/e/", handlers.Encode(db, tableName))
+	http.HandleFunc("/d", handlers.Decode(db, tableName))
+	http.HandleFunc("/e", handlers.Encode(db, tableName))
 
 	fmt.Println("Running on port: " + port)
 	err := http.ListenAndServe(":"+port, nil) // set listen port
