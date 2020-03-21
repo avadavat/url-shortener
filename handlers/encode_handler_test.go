@@ -31,7 +31,7 @@ func (m *mockDynamoDBClient) GetItem(input *dynamodb.GetItemInput) (*dynamodb.Ge
 		return output, nil
 	}
 
-	return nil, errors.New("item does not exist in the database")
+	return &dynamodb.GetItemOutput{Item: map[string]*dynamodb.AttributeValue{}}, nil
 }
 func (m *mockDynamoDBClient) PutItem(input *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
 	if *input.Item["longLink"].S == "putErrorUrl" {
