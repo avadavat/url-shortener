@@ -9,16 +9,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/dpgil/url-shortener/types"
-	"github.com/dpgil/url-shortener/util"
 )
 
 // Decode takes a short link and returns the long link.
 func Decode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// parse short link from request
-		shortLink, err := util.ParseURLArg("/d/", r.URL.String())
-		if err != nil {
-			http.Error(w, "error parsing url", http.StatusBadRequest)
+		q := r.URL.Query()
+		shortLink := q.Get("q")
+		if shortLink == "" {
+			http.Error(w, "missing query param", http.StatusBadRequest)
 			return
 		}
 

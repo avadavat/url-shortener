@@ -35,7 +35,7 @@ func TestDecodeHandler(t *testing.T) {
 	t.Run("shortlink doesn't exist", func(t *testing.T) {
 		t.Parallel()
 
-		r, err := http.NewRequest("GET", "/d/someShortLink", nil)
+		r, err := http.NewRequest("GET", "/d?q=someShortLink", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -52,7 +52,7 @@ func TestDecodeHandler(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		r, err := http.NewRequest("GET", "/d/getItemSuccess", nil)
+		r, err := http.NewRequest("GET", "/d?q=getItemSuccess", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
