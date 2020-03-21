@@ -18,9 +18,10 @@ const maxRetries = 3
 func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// parse long link from request
-		longLink, err := util.ParseURLArg("/e/", r.URL.String())
-		if err != nil {
-			http.Error(w, "error parsing url", http.StatusBadRequest)
+		q := r.URL.Query()
+		longLink := q.Get("q")
+		if longLink == "" {
+			http.Error(w, "missing query param", http.StatusBadRequest)
 			return
 		}
 

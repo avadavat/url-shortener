@@ -68,7 +68,7 @@ func TestEncodeHandler(t *testing.T) {
 	t.Run("dynamo put error", func(t *testing.T) {
 		t.Parallel()
 
-		r, err := http.NewRequest("GET", "/e/putErrorUrl", nil)
+		r, err := http.NewRequest("GET", "/e?q=putErrorUrl", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -85,7 +85,7 @@ func TestEncodeHandler(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		r, err := http.NewRequest("GET", "/e/https://google.com", nil)
+		r, err := http.NewRequest("GET", "/e?q=https://google.com", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
