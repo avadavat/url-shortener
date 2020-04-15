@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -20,6 +21,11 @@ func Encode(db dynamodbiface.DynamoDBAPI, tableName string) func(w http.Response
 		// parse long link from request
 		q := r.URL.Query()
 		longLink := q.Get("q")
+		longLink, err := url.QueryUnescape(longLink)
+		if err != nil {
+			http.Error(w, "error with QueryUnescape on longLink param", http.StatusBadRequest)
+			return
+		}
 		if longLink == "" {
 			http.Error(w, "missing query param", http.StatusBadRequest)
 			return
